@@ -275,89 +275,64 @@ tbody tr:hover { background: #dbe9ff; }
 
 </div>
 
-<script>
-  var openingBalance;
-  var cashFlowData;
-  var accounts;
-    // Function to load JSON as a Promise
-// Function to load JSON with fallback
+
+ <script>
+var openingBalance;
+var cashFlowData;
+var accounts;
+
+// Function to load JSON with fallback using AJAX
 function loadFinanceData() {
-  return $.getJSON('fin_data.json')  // try personal file first
-    .fail(function() {
-      console.warn('Personal data not found, loading template instead.');
-      return $.getJSON('fin_data_template.json');
-    })
-    .done(function(data) {
-      openingBalance = data.openingBalance;
-      cashFlowData = data.cashFlowData;
-      accounts = data.accounts;
-
-      console.log("Opening Balance:", openingBalance);
-      console.log("Cash Flow Data:", cashFlowData);
-      console.log("Accounts:", accounts);
-
-      // Call any functions that depend on the data
-      processFinanceData();
+  return $.ajax({
+    url: 'fin_data.json',
+    dataType: 'json'
+  }).fail(function() {
+    console.warn('Personal data not found, loading template instead.');
+    return $.ajax({
+      url: 'fin_data_template.json',
+      dataType: 'json'
     });
+  }).done(function(data) {
+    openingBalance = data.openingBalance;
+    cashFlowData = data.cashFlowData;
+    accounts = data.accounts;
+
+    console.log("Opening Balance:", openingBalance);
+    console.log("Cash Flow Data:", cashFlowData);
+    console.log("Accounts:", accounts);
+
+    processFinanceData(); // call your dependent function
+  });
 }
 
-$(document).ready(async function() {
-    // Declare global variables
-  await loadFinanceData(); // Wait until JSON is fully loaded
+$(document).ready(function() {
+  loadFinanceData().then(function() {
+    // Totals
+    const totals = accounts.reduce((acc,a)=>{
+      acc.total += a.balance;
+      acc.byType[a.type] = (acc.byType[a.type]||0)+a.balance;
+      return acc;
+    }, { total:0, byType:{} });
 
+    // Animate counters
+    function animateCounter(element,target){
+      let start=0, steps=100, increment=target/steps, stepTime=15;
+      const timer=setInterval(()=>{
+        start+=increment;
+        if(start>=target) start=target;
+        $(element).text('₹'+Math.floor(start));
+        if(start>=target) clearInterval(timer);
+      }, stepTime);
+    }
 
+    animateCounter('#misDeposit', totals.byType['MIS']||0);
+    animateCounter('#fdDeposit', (totals.byType['FD']||0)+(totals.byType['TD']||0));
+    animateCounter('#rdDeposit', totals.byType['RD']||0);
+    const totalCapitalValue =
+      (totals.byType['MIS']||0) + (totals.byType['FD']||0) + (totals.byType['TD']||0) + (totals.byType['RD']||0);
+    animateCounter('#totalCapital', totalCapitalValue);
 
-  // Totals
-  const totals = accounts.reduce((acc,a)=>{
-    acc.total += a.balance;
-    acc.byType[a.type] = (acc.byType[a.type]||0)+a.balance;
-    return acc;
-  }, { total:0, byType:{} });
-
-  // Animate counters
-  function animateCounter(element,target){
-    let start=0,steps=100,increment=target/steps,stepTime=15;
-    const timer=setInterval(()=>{
-      start+=increment;
-      if(start>=target) start=target;
-      $(element).text('₹'+start);
-      if(start>=target) clearInterval(timer);
-    },stepTime);
-  }
-
-
-
-window.addEventListener('resize', () => {
-  // Example: resize ApexCharts if charts exist
-    if (pieChart) {
-    pieChart.updateOptions({
-      chart: { height: window.innerWidth < 600 ? 180 : 220 }
-    });
-  }
-      if (maturityChart) {
-    maturityChart.updateOptions({
-      chart: { height: window.innerWidth < 600 ? 180 : 220 }
-    });
-  }
-
-
-});
-
-
-
-  animateCounter('#misDeposit', totals.byType['MIS']||0);
-  animateCounter('#fdDeposit', (totals.byType['FD']||0)+(totals.byType['TD']||0));
-  animateCounter('#rdDeposit', totals.byType['RD']||0);
-  // NEW: Total Capital counter
-const totalCapitalValue =
-  (totals.byType['MIS'] || 0) +
-  (totals.byType['FD'] || 0) +
-  (totals.byType['TD'] || 0) +
-  (totals.byType['RD'] || 0);
-
-animateCounter('#totalCapital', totalCapitalValue);
-
-  $('#activeAccounts').text(accounts.length);
+    $('#activeAccounts').text(accounts.length);
 
   // Populate table
   const tbody=$('#depositTable tbody');
@@ -626,8 +601,11 @@ maturityChart.render();
 
     $('#cashFlowTable tbody').html(tableBody);
 
-
+  }).catch(function(err) {
+    console.error("Failed to load finance data:", err);
+  });
 });
 </script>
+
 </body>
 </html>
