@@ -280,21 +280,26 @@ tbody tr:hover { background: #dbe9ff; }
   var cashFlowData;
   var accounts;
     // Function to load JSON as a Promise
-  function loadFinanceData() {
-    return $.getJSON('fin_data.json')
-      .done(function(data) {
-        openingBalance = data.openingBalance;
-        cashFlowData = data.cashFlowData;
-        accounts = data.accounts;
+// Function to load JSON with fallback
+function loadFinanceData() {
+  return $.getJSON('fin_data.json')  // try personal file first
+    .fail(function() {
+      console.warn('Personal data not found, loading template instead.');
+      return $.getJSON('fin_data_template.json');
+    })
+    .done(function(data) {
+      openingBalance = data.openingBalance;
+      cashFlowData = data.cashFlowData;
+      accounts = data.accounts;
 
-        console.log("Opening Balance:", openingBalance);
-        console.log("Cash Flow Data:", cashFlowData);
-        console.log("Accounts:", accounts);
-      })
-      .fail(function(jqxhr, textStatus, error) {
-        console.error("Error loading JSON:", textStatus, error);
-      });
-  }
+      console.log("Opening Balance:", openingBalance);
+      console.log("Cash Flow Data:", cashFlowData);
+      console.log("Accounts:", accounts);
+
+      // Call any functions that depend on the data
+      processFinanceData();
+    });
+}
 
 $(document).ready(async function() {
     // Declare global variables
