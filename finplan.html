@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Financial Depository Dashboard</title>
+
+<!-- Libraries -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<style>
+:root {
+  --primary: #0b5fff;
+  --primary-dark: #004aad;
+  --secondary: #00b894;
+  --accent: #ff6600;
+  --bg: #f4f7fb;
+  --card-bg: #fff;
+  --shadow: rgba(0,0,0,0.2);
+  --radius: 12px;
+  --spacing: 16px;
+  --font-base: 14px;
+  --font-lg: 16px;
+  --font-xl: 24px;
+  --text-color: #0f172a;
+  --heading-color: #002c6a;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text-color);
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing);
+}
+
+/* Centered shadowed container */
+.container {
+  max-width: 1200px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: var(--radius);
+  box-shadow: 0 12px 36px var(--shadow);
+  padding: var(--spacing);
+  margin: 20px 0;
+}
+
+/* Top Navigation */
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing);
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--radius);
+  margin-bottom: var(--spacing);
+}
+
+.top-nav .logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: var(--font-xl);
+}
+
+.top-nav .logo svg {
+  width: 28px;
+  height: 28px;
+}
+
+.top-nav .nav-icons i {
+  margin-left: 20px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+/* Main Content */
+.main h1 {
+  font-size: var(--font-xl);
+  margin-bottom: var(--spacing);
+  color: var(--heading-color);
+  text-align: center;
+}
+
+/* Grid & Cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+  margin-bottom: var(--spacing);
+}
+
+.card {
+  background: var(--card-bg);
+  padding: 12px;
+  border-radius: var(--radius);
+  box-shadow: 0 6px 20px var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-sizing: border-box; /* include padding/border in card width */
+  width: 100%; /* ensure it stays within the grid cell */
+  margin: 0; /* remove default margin that may push it out */
+  padding:10px;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px var(--shadow);
+}
+
+.card-header {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* KPI Counter */
+.counter {
+  font-size: 1.2em;
+  font-weight: 700;
+  color: var(--heading-color);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+th {
+  background: var(--primary);
+  color: #fff;
+  padding: 8px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e8eefc;
+}
+
+tbody tr:nth-child(odd) { background: #f9fbff; }
+tbody tr:hover { background: #dbe9ff; }
+
+.num { text-align: right; }
+
+.chart { height: 220px; }
+
+@media (max-width: 700px){
+  .grid { grid-template-columns: 1fr; }
+  .card-header { font-size: 13px; }
+  .counter { font-size: 1em; }
+  table { font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<!-- Top Navigation -->
+<div class="top-nav" style="justify-content: center; padding: 20px; background: linear-gradient(90deg, #0b5fff, #004aad); color: #fff; border-radius: 12px;">
+  <div class="logo" style="display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 28px; font-family: 'Ubuntu', sans-serif;">
+    <!-- SVG Logo: coins and growth bars -->
+    <svg width="36" height="36" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Coin base -->
+      <circle cx="32" cy="32" r="28" stroke="white" stroke-width="4"/>
+      <!-- Growth bars -->
+      <rect x="20" y="28" width="4" height="12" fill="white"/>
+      <rect x="28" y="24" width="4" height="16" fill="white"/>
+      <rect x="36" y="20" width="4" height="20" fill="white"/>
+    </svg>
+    FundSphere
+  </div>
+</div>
+
+  <div class="main">
+
+
+    <!-- KPI Cards -->
+    <div class="grid">
+
+          <!-- New Total Capital Card -->
+  <div class="card" style="background:#ede7f6; border-left: 5px solid #6a1b9a; color:#6a1b9a;">
+    <div class="card-header"><i class="fa-solid fa-sack-dollar"></i> Total Capital</div>
+    <div class="counter" id="totalCapital">₹0</div>
+  </div>
+
+      <div class="card" style="background:#e3f2fd; border-left: 5px solid #0b5fff; color:#0b5fff;">
+        <div class="card-header"><i class="fa-solid fa-piggy-bank"></i> MIS Accounts</div>
+        <div class="counter" id="misDeposit">₹0</div>
+      </div>
+
+      <div class="card" style="background:#fff3e0; border-left: 5px solid #ff6600; color:#ff6600;">
+        <div class="card-header"><i class="fa-solid fa-building-columns"></i> Fixed Deposits / TD</div>
+        <div class="counter" id="fdDeposit">₹0</div>
+      </div>
+
+      <div class="card" style="background:#e0f7fa; border-left: 5px solid #00b894; color:#007d6b;">
+        <div class="card-header"><i class="fa-solid fa-chart-line"></i> Recurring Deposits</div>
+        <div class="counter" id="rdDeposit">₹0</div>
+      </div>
+
+      <div class="card" style="background:#fce4ec; border-left: 5px solid #d81b60; color:#d81b60;">
+        <div class="card-header"><i class="fa-solid fa-users"></i> Active Accounts</div>
+        <div class="counter" id="activeAccounts">0</div>
+      </div>
+    </div>
+
+    <!-- Charts & Table -->
+    <div class="grid">
+      <div class="card">
+        <div class="card-header">Deposit Distribution</div>
+        <div id="pieChart" class="chart"></div>
+
+
+    <div class="card-header">Maturity Distribution</div>
+    <div id="maturityChart" class="chart"></div>
+
+
+
+      </div>
+      <div class="card">
+        <div class="card-header">Deposit Accounts</div>
+        <table id="depositTable">
+          <thead>
+            <tr>
+              <th>Account</th>
+              <th>Type</th>
+              <th>Balance</th>
+              <th>Start Date</th>
+              <th>Maturity</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+
+
+      <!-- NEW CASH FLOW SECTION -->
+  <div class="grid">
+    <div class="card" style="background:#f1f8e9; border-left: 5px solid #43a047; ">
+      <div class="card-header"><i class="fa-solid fa-money-bill-trend-up"></i> Cash Flow</div>
+      <table id="cashFlowTable">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+
+  </div>
+
+
+
+
+
+
+</div>
+
+<script>
+
+$(function(){
+
+  // JSON data for Cash Flow
+  const openingBalance = 500;
+
+  // Cash flow transactions
+  const cashFlowData = [
+    { type: 'inflow', category: 'Salary', amount: 118000, status: 'received' },
+    { type: 'outflow', category: 'Credit Card', amount: 51000, status: 'paid' },
+    { type: 'outflow', category: 'Servant', amount: 8000, status: 'not paid' },
+    { type: 'outflow', category: 'Rent', amount: 8250, status: 'paid' },
+    { type: 'outflow', category: 'Prakash Loan', amount: 19674, status: 'paid' },
+    { type: 'outflow', category: 'Wife', amount: 20000, status: 'paid' },
+    { type: 'inflow', category: 'Rental Income', amount: 18000, status: 'received' },
+    { type: 'reserve', category: 'Interest Reserve', amount: 20000, status: 'untouched' }
+  ];
+
+    const accounts = [
+    { no: '4966632633', type: 'MIS', balance: 25000, open: '2020-11-21', mat: '2025-11-21', rate: 0.6 },
+    { no: '4926567500', type: 'MIS', balance: 30000, open: '2020-10-09', mat: '2025-10-09', rate: 0.6 },
+    { no: '020044741114', type: 'MIS', balance: 85000, open: '2022-07-21', mat: '2027-07-21', rate: 0.6 },
+    { no: '4984525276', type: 'MIS', balance: 29000, open: '2020-12-14', mat: '2025-12-14', rate: 0.6 },
+    { no: '020078180730', type: 'MIS', balance: 75000, open: '2023-06-07', mat: '2028-06-07', rate: 0.6 },
+    { no: '020082572132', type: 'MIS', balance: 105000, open: '2023-07-24', mat: '2028-07-24', rate: 0.6 },
+    { no: '020077127576', type: 'MIS', balance: 75000, open: '2023-05-25', mat: '2028-05-25', rate: 0.6 },
+    { no: '020081215830', type: 'MIS', balance: 99000, open: '2023-07-10', mat: '2028-07-10', rate: 0.6 },
+    { no: '020039583922', type: 'MIS', balance: 200000, open: '2022-05-07', mat: '2027-05-07', rate: 0.6 },
+    { no: '020039443686', type: 'MIS', balance: 30000, open: '2022-05-06', mat: '2027-05-06', rate: 0.6 },
+    { no: '4916143820', type: 'MIS', balance: 51000, open: '2020-09-29', mat: '2025-09-29', rate: 0.6 },
+    { no: '020081216030', type: 'MIS', balance: 96000, open: '2023-07-10', mat: '2028-07-10', rate: 0.6 },
+    { no: '20083774569', type: 'FD', balance: 165000, open: '2023-08-08', mat: '2028-08-08', rate: 0.7 },
+    { no: '20073467902', type: 'TD', balance: 2340000, open: '2023-04-10', mat: '2028-04-10', rate: 0.7 },
+    { no: '20011274223', type: 'RD', balance: 300000, open: '2021-04-29', mat: '2026-04-29', rate: 0.6 },
+    { no: '20011273694', type: 'RD', balance: 300000, open: '2021-04-29', mat: '2026-04-29', rate: 0.6 },
+    { no: '20011273538', type: 'RD', balance: 300000, open: '2021-04-29', mat: '2026-04-29', rate: 0.6 },
+    { no: '20043825591', type: 'RD', balance: 60000, open: '2022-07-09', mat: '2027-07-09', rate: 0.6 },
+    { no: 'FATHER-RD-001', type: 'RD', balance: 600000, open: '2021-10-01', mat: '2026-10-01', rate: 0.6 }
+  ];
+
+  // Totals
+  const totals = accounts.reduce((acc,a)=>{
+    acc.total += a.balance;
+    acc.byType[a.type] = (acc.byType[a.type]||0)+a.balance;
+    return acc;
+  }, { total:0, byType:{} });
+
+  // Animate counters
+  function animateCounter(element,target){
+    let start=0,steps=100,increment=target/steps,stepTime=15;
+    const timer=setInterval(()=>{
+      start+=increment;
+      if(start>=target) start=target;
+      $(element).text('₹'+start);
+      if(start>=target) clearInterval(timer);
+    },stepTime);
+  }
+
+
+
+window.addEventListener('resize', () => {
+  // Example: resize ApexCharts if charts exist
+    if (pieChart) {
+    pieChart.updateOptions({
+      chart: { height: window.innerWidth < 600 ? 180 : 220 }
+    });
+  }
+      if (maturityChart) {
+    maturityChart.updateOptions({
+      chart: { height: window.innerWidth < 600 ? 180 : 220 }
+    });
+  }
+
+
+});
+
+
+
+  animateCounter('#misDeposit', totals.byType['MIS']||0);
+  animateCounter('#fdDeposit', (totals.byType['FD']||0)+(totals.byType['TD']||0));
+  animateCounter('#rdDeposit', totals.byType['RD']||0);
+  // NEW: Total Capital counter
+const totalCapitalValue =
+  (totals.byType['MIS'] || 0) +
+  (totals.byType['FD'] || 0) +
+  (totals.byType['TD'] || 0) +
+  (totals.byType['RD'] || 0);
+
+animateCounter('#totalCapital', totalCapitalValue);
+
+  $('#activeAccounts').text(accounts.length);
+
+  // Populate table
+  const tbody=$('#depositTable tbody');
+  accounts.forEach(a=>{
+    tbody.append(`<tr>
+      <td>${a.no}</td>
+      <td>${a.type}</td>
+      <td class="num">${a.balance}</td>
+      <td class="open-col">${a.open}</td>
+      <td>${a.mat}</td>
+    </tr>`);
+  });
+
+  // Hide "Open" column on mobile
+if (window.innerWidth <= 768) {
+  $('#depositTable th:nth-child(4), #depositTable td.open-col').hide();
+}
+
+  // Pie chart
+  const pieChart = new ApexCharts(document.querySelector('#pieChart'),{
+    chart:{type:'donut',height:220},
+    series:[
+      totals.byType['MIS']||0,
+      totals.byType['FD']||0,
+      totals.byType['TD']||0,
+      totals.byType['RD']||0
+    ],
+    labels:['MIS','FD','TD','RD'],
+    colors:['#0b5fff','#ff6600','#ffa500','#00b894']
+  });
+  pieChart.render();
+
+
+    // ---------- Table sorting (toggle asc/desc). Supports numeric and date (dd-mm-yyyy or yyyy-mm-dd) ----------
+  function parseNumberText(txt){
+    if (!txt) return 0;
+    return Number(String(txt).replace(/[₹,\s]/g,'') || 0);
+  }
+  function parseDateText(txt){
+    if (!txt) return 0;
+    txt = String(txt).trim();
+    // yyyy-mm-dd
+    if (/^\d{4}-\d{2}-\d{2}$/.test(txt)) {
+      return new Date(txt);
+    }
+    // dd-mm-yyyy or dd/mm/yyyy
+    if (/^\d{2}[-/]\d{2}[-/]\d{4}$/.test(txt)) {
+      const parts = txt.split(/[-/]/);
+      const d = parseInt(parts[0],10), m = parseInt(parts[1],10)-1, y = parseInt(parts[2],10);
+      return new Date(y,m,d);
+    }
+    // fallback
+    const parsed = Date.parse(txt);
+    return isNaN(parsed) ? new Date(txt) : new Date(parsed);
+  }
+
+  // Table sorting
+$('#depositTable th').on('click', function() {
+    const $th = $(this);
+    const table = $th.closest('table');
+    const tbody = table.find('tbody');
+    const rows = tbody.find('tr').toArray();
+    const colIndex = $th.index();
+
+    // Determine type: number, date, or text (set via data-type on th)
+    const type = $th.data('type') || 'text';
+
+    // Toggle sort order
+    const currentOrder = $th.data('order') || 'asc';
+    const nextOrder = currentOrder === 'asc' ? 'desc' : 'asc';
+    table.find('th').data('order', null); // reset other headers
+    $th.data('order', nextOrder);
+
+    rows.sort((rA, rB) => {
+        let aText = $(rA).children('td').eq(colIndex).text().trim();
+        let bText = $(rB).children('td').eq(colIndex).text().trim();
+
+        if(type === 'number') {
+            return parseNumberText(aText) - parseNumberText(bText);
+        }
+        if(type === 'date') {
+            return parseDateText(aText) - parseDateText(bText);
+        }
+        // text
+        return aText.localeCompare(bText, undefined, { numeric: true });
+    });
+
+    if(nextOrder === 'desc') rows.reverse();
+    tbody.append(rows);
+});
+
+// ---------- Maturity Distribution ----------
+const maturityTotals = {};
+accounts.forEach(a => {
+  const year = new Date(a.mat).getFullYear();
+  maturityTotals[year] = (maturityTotals[year] || 0) + a.balance;
+});
+
+const maturityYears = Object.keys(maturityTotals).sort();
+const maturityValues = maturityYears.map(y => maturityTotals[y]);
+
+const maturityChart=new ApexCharts(document.querySelector("#maturityChart"), {
+  chart: { type: 'bar', height: 280 },
+  plotOptions: {
+    bar: {
+      columnWidth: '60%' // Default width for normal screens
+    }
+  },
+  series: [{
+    name: 'Balance',
+    data: maturityValues
+  }],
+  xaxis: {
+    categories: maturityYears,
+    title: { text: 'Maturity Year' }
+  },
+  yaxis: {
+    title: { text: 'Total Balance (₹ in Lakhs)' },
+    labels: {
+      formatter: val => (val / 100000).toFixed(2) + ' L'
+    }
+  },
+  colors: ['#0b5fff'],
+  dataLabels: {
+    enabled: false
+
+  },
+  responsive: [
+    {
+      breakpoint: 768, // Tablets
+      options: {
+        plotOptions: {
+          bar: { columnWidth: '45%' } // Slimmer bars
+        }
+      }
+    },
+    {
+      breakpoint: 480, // Small phones
+      options: {
+        plotOptions: {
+          bar: { columnWidth: '35%' } // Even slimmer bars
+        }
+      }
+    }
+  ]
+});
+
+maturityChart.render();
+
+
+
+    const formatCurrency = (value) => `₹${value.toLocaleString('en-IN')}`;
+    let tableBody = '';
+    let balance = openingBalance;
+    let pendingRows = '', inflowRows = '', debitedRows = '', reserveRows = '';
+
+    let pendingInflow = 0;
+    let pendingOutflow = 0;
+
+    // Opening Balance
+    tableBody += `
+      <tr style="background:#f1f8e9; font-weight:bold;">
+        <td><i class="fa-solid fa-vault" style="color:#1b5e20;"></i></td>
+        <td>Open Bal</td>
+        <td>${formatCurrency(openingBalance)}</td>
+        <td><i class="fa-solid fa-circle-check" style="color:green;"></i> Confirmed</td>
+      </tr>
+    `;
+
+    // Process transactions
+    cashFlowData.forEach(item => {
+      let icon = '';
+      let row = '';
+
+      if (item.type === 'inflow') {
+        icon = '<i class="fa-solid fa-arrow-down" style="color:green;"></i>';
+        if (item.status === 'received') {
+          balance += item.amount;
+          inflowRows += `
+            <tr>
+              <td>${icon}</td>
+              <td>${item.category}</td>
+              <td>${formatCurrency(item.amount)}</td>
+              <td><i class="fa-solid fa-circle-check" style="color:green;"></i> Received</td>
+            </tr>`;
+        } else {
+            pendingInflow += item.amount;
+          pendingRows += `
+            <tr>
+              <td>${icon}</td>
+              <td>${item.category}</td>
+              <td>${formatCurrency(item.amount)}</td>
+              <td><i class="fa-solid fa-clock" style="color:orange;"></i> Pending</td>
+            </tr>`;
+        }
+      }
+
+      if (item.type === 'outflow') {
+        icon = '<i class="fa-solid fa-arrow-up" style="color:red;"></i>';
+        if (item.status === 'paid') {
+          balance -= item.amount;
+          debitedRows += `
+            <tr>
+              <td>${icon}</td>
+              <td>${item.category}</td>
+              <td>${formatCurrency(item.amount)}</td>
+              <td><i class="fa-solid fa-circle-check" style="color:green;"></i> Debited</td>
+            </tr>`;
+        } else {
+            pendingOutflow += item.amount;
+          pendingRows += `
+            <tr>
+              <td>${icon}</td>
+              <td>${item.category}</td>
+              <td>${formatCurrency(item.amount)}</td>
+              <td><i class="fa-solid fa-circle-exclamation" style="color:orange;"></i> Unpaid</td>
+            </tr>`;
+        }
+      }
+
+      if (item.type === 'reserve') {
+        reserveRows += `
+          <tr style="background:#fce4ec;">
+            <td><i class="fa-solid fa-piggy-bank" style="color:#d81b60;"></i></td>
+            <td>${item.category}</td>
+            <td>${formatCurrency(item.amount)}</td>
+            <td><i class="fa-solid fa-lock" style="color:gray;"></i> Reserved</td>
+          </tr>`;
+      }
+    });
+
+    // Combine all rows in sections
+    if (inflowRows) {
+      tableBody += `<tr style="background:#e8f5e9; font-weight:bold;"><td colspan="4">Inflow</td></tr>${inflowRows}`;
+    }
+    if (pendingRows) {
+      tableBody += `<tr style="background:#fff3e0; font-weight:bold;"><td colspan="4">Pending Transactions</td></tr>${pendingRows}`;
+    }
+    if (debitedRows) {
+      tableBody += `<tr style="background:#fbe9e7; font-weight:bold;"><td colspan="4">Debited</td></tr>${debitedRows}`;
+    }
+    if (reserveRows) {
+      tableBody += `<tr style="background:#ede7f6; font-weight:bold;"><td colspan="4">Reserved Funds</td></tr>${reserveRows}`;
+    }
+
+    // Net Available
+    tableBody += `
+      <tr style="background:#c8e6c9; font-weight:bold;">
+        <td><i class="fa-solid fa-wallet" style="color:#1b5e20;"></i></td>
+        <td>Net Cash Available</td>
+        <td>${formatCurrency(balance)}</td>
+        <td><i class="fa-solid fa-circle-info" style="color:#1b5e20;"></i> Updated</td>
+      </tr>
+    `;
+
+            // Likely Balance after pending inflow and outflow
+    const likelyBalance = balance + pendingInflow - pendingOutflow;
+    tableBody += `
+      <tr style="background:#b3e5fc; font-weight:bold;">
+        <td><i class="fa-solid fa-chart-line" style="color:#01579b;"></i></td>
+        <td>Likely Balance</td>
+        <td>${formatCurrency(likelyBalance)}</td>
+        <td><i class="fa-solid fa-circle-info" style="color:#01579b;"></i> Forecast</td>
+      </tr>
+    `;
+
+    $('#cashFlowTable tbody').html(tableBody);
+
+
+});
+</script>
+</body>
+</html>
